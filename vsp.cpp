@@ -33,8 +33,8 @@ void ClearHEX(char* msg);
 char ColorSwitch();
 
 typedef void CBaseHudChat__ChatPrintf_t(void *ecx, int iPlayerIndex, int iFilter, const char* fmt, ...);
-typedef void __fastcall CBaseHudChat__StartMessageMode_t(void *eax, void *ecx, int iMessageModeType);
-typedef void __fastcall CBaseHudChat__StopMessageMode_t(void* eax, void* ecx);
+typedef void __fastcall CBaseHudChat__StartMessageMode_t(void* ecx, void* edx, int iMessageModeType);
+typedef void __fastcall CBaseHudChat__StopMessageMode_t(void* ecx, void* edx);
 
 
 class VSP: public IServerPluginCallbacks
