@@ -28,7 +28,7 @@ void *(*CSigScan::sigscan_dllfunc)(const char *pName, int *pReturnCode);
  
 /* Initialize the Signature Object */
 void CSigScan::Init(unsigned char *sig, unsigned char *mask) {
-    is_set = 0;
+    is_set = false;
  
     sig_len = strlen((char*)mask);
     sig_str = new unsigned char[sig_len];
@@ -44,7 +44,7 @@ void CSigScan::Init(unsigned char *sig, unsigned char *mask) {
     if((sig_addr = FindSignature()) == NULL)
         return ; // FindSignature() Failed
  
-    is_set = 1;
+    is_set = true;
     // SigScan Successful!
 }
  

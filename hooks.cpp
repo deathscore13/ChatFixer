@@ -41,7 +41,7 @@ void CHook::Unhook()
 	VirtualProtect(addr, __CHOOK_SIZE, oldProtect, NULL);
 }
 
-bool CHook::Hooked()
+bool CHook::IsHooked()
 {
 	return hooked;
 }

@@ -23,7 +23,7 @@ public:
 	void Hook();
 	void Unhook();
 
-	bool Hooked();
+	bool IsHooked();
 };
 
 #endif

@@ -33,12 +33,12 @@ public:
     static void *(*sigscan_dllfunc)(const char *pName, int *pReturnCode);
  
     /* If the scan was successful or not */
-    char is_set;
+    bool is_set;
     /* Starting address of the found function */
     void *sig_addr;
  
     /* Public Functions */
-    CSigScan(void): sig_str(NULL), sig_mask(NULL), sig_len(0), sig_addr(NULL), is_set(0) {}
+    CSigScan(void): sig_str(NULL), sig_mask(NULL), sig_len(0), sig_addr(NULL), is_set(false) {}
     ~CSigScan(void);
  
     static bool GetDllMemInfo(void);
