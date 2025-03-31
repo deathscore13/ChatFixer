@@ -4,13 +4,13 @@ CHook::CHook(DWORD func, void* address)
 {
 	addr = address;
 
-	memcpy(jmp, "\xE9\x90\x90\x90\x90\xC3", __CHOOK_SIZE); // запись маски для команды перехода
+	memcpy(jmp, "\xE9\x90\x90\x90\x90\xC3", __CHOOK_SIZE);
 
-	DWORD JMPSize = (func - (DWORD)addr - 5); // смещение относительно оригинала
+	DWORD JMPSize = (func - (DWORD)addr - 5);
 	VirtualProtect(addr, __CHOOK_SIZE, PAGE_EXECUTE_READWRITE, &oldProtect);
 
 	memcpy(oldBytes, addr, __CHOOK_SIZE);
-	memcpy(&jmp[1], &JMPSize, 4); // запись 4-х байт смещения (x86)
+	memcpy(&jmp[1], &JMPSize, 4);
 
 	VirtualProtect(addr, __CHOOK_SIZE, oldProtect, NULL);
 }

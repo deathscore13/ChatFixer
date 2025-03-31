@@ -82,8 +82,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\public;..\..\public\tier0;..\..\public\tier1;..\..\dlls;..\..\game_shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);WINDOWS_IGNORE_PACKING_MISMATCH</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\tier1;..\..\cl_dll;..\..\public;..\..\public\tier0;..\..\public\tier1;..\..\dlls;..\..\game_shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>COMPILER_MSVC;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);WINDOWS_IGNORE_PACKING_MISMATCH</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -96,6 +96,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
       <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -115,6 +116,19 @@
       <ImportLibrary>.\Debug\vsp.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist cstrike (
+  echo Создание $(ProjectDir)cstrike\addons...
+  md $(ProjectDir)cstrike\addons
+)
+
+echo Копирование ChatFixer.vdf...
+copy $(ProjectDir)ChatFixer.vdf $(ProjectDir)cstrike\addons\ChatFixer.vdf
+
+echo Копирование ChatFixer.dll...
+copy $(TargetPath) $(ProjectDir)cstrike\addons\ChatFixer.dll
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -130,7 +144,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..\..\public;..\..\public\tier0;..\..\public\tier1;..\..\dlls;..\..\game_shared;%(AdditionalIncludeDirectories</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\tier1;..\..\cl_dll;..\..\public;..\..\public\tier0;..\..\public\tier1;..\..\dlls;..\..\game_shared;%(AdditionalIncludeDirectories</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);WINDOWS_IGNORE_PACKING_MISMATCH</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -164,6 +178,19 @@
       <ImportLibrary>.\Release\vsp.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist cstrike (
+  echo Создание $(ProjectDir)cstrike\addons...
+  md $(ProjectDir)cstrike\addons
+)
+
+echo Копирование ChatFixer.vdf...
+copy $(ProjectDir)ChatFixer.vdf $(ProjectDir)cstrike\addons\ChatFixer.vdf
+
+echo Копирование ChatFixer.dll...
+copy $(TargetPath) $(ProjectDir)cstrike\addons\ChatFixer.dll
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="hooks.cpp" />
@@ -171,7 +198,7 @@
     </ClCompile>
     <ClCompile Include="vsp.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;_WINDOWS;_MBCS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COMPILER_MSVC;COMPILER_MSVC32;WIN32;_DEBUG;_WINDOWS;_MBCS</PreprocessorDefinitions>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
