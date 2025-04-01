@@ -1,7 +1,7 @@
 #pragma comment(lib, "legacy_stdio_definitions.lib")
 #pragma warning(disable: 4005)
 
-#define VSP_VERSION "2.0.0"
+#define VSP_VERSION "2.0.1"
 
 // hl2sdk-episode1
 #include "engine/iserverplugin.h"
@@ -50,7 +50,7 @@ typedef void __fastcall CBaseHudChatLine__InsertAndColorizeText_t(DWORD* ecx, vo
 // calls
 #define CBaseHudChat__GetParent(ptr) \
     __call<vgui::Panel* (__thiscall*)(void*)>(ptr, 144)(ptr)
-// Color записывается через edx
+// return Color --> edx
 #define CBaseHudChat__GetTextColorForClient(ptr, color, colorNum, clientIndex) \
     __call<void (__thiscall*)(void*, Color&, TextColor, int)>(ptr, 88)(ptr, color, colorNum, clientIndex)
 #define CBaseHudChatLine__Colorize(ptr, alpha) \
@@ -71,8 +71,6 @@ public:
 };
 
 
-CreateInterfaceFn clientFactory;
-
 CSigScan StartMessageMode, StopMessageMode, InsertAndColorizeText;
 CHook *StartMessageMode_h, *StopMessageMode_h, *InsertAndColorizeText_h;
 
@@ -90,10 +88,10 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(ChatFixer, IServerPluginCallbacks, INTERFACEVE
 
 bool ChatFixer::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory)
 {
-    clientFactory = Sys_GetFactory("client.dll");
+    CreateInterfaceFn clientFactory = Sys_GetFactory("client.dll");
     if (clientFactory == NULL)
     {
-        Error("client.dll: Sys_GetFactory failed\n");
+        Error("client.dll: Sys_GetFactory() failed\n");
         return false;
     }
 
@@ -110,7 +108,7 @@ bool ChatFixer::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameS
         (unsigned char*)CBaseHudChat_StartMessageMode_MASK);
     if (!StartMessageMode.is_set)
     {
-        Error("Unable to get CBaseHudChat::StartMessageMode address\n");
+        Error("Unable to get CBaseHudChat::StartMessageMode() address\n");
         return false;
     }
 
@@ -118,7 +116,7 @@ bool ChatFixer::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameS
         (unsigned char*)CBaseHudChat_StopMessageMode_MASK);
     if (!StopMessageMode.is_set)
     {
-        Error("Unable to get CBaseHudChat::StopMessageMode address\n");
+        Error("Unable to get CBaseHudChat::StopMessageMode() address\n");
         return false;
     }
 
@@ -126,7 +124,7 @@ bool ChatFixer::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameS
         (unsigned char*)CBaseHudChatLine_InsertAndColorizeText_MASK);
     if (!InsertAndColorizeText.is_set)
     {
-        Error("Unable to get CBaseHudChatLine::InsertAndColorizeText address\n");
+        Error("Unable to get CBaseHudChatLine::InsertAndColorizeText() address\n");
         return false;
     }
 
@@ -144,7 +142,7 @@ bool ChatFixer::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameS
     s_pCVar = (ICvar*)interfaceFactory(VENGINE_CVAR_INTERFACE_VERSION, NULL);
     if (s_pCVar == NULL)
     {
-        Error("Unable to get " VENGINE_CVAR_INTERFACE_VERSION " interface\n");
+        Error("Unable to get '" VENGINE_CVAR_INTERFACE_VERSION "' interface\n");
         return false;
     }
 
@@ -182,6 +180,7 @@ void ChatFixer::Unload(void)
         delete[] m_text;
         m_text = NULL;
     }
+    InsertAndColorizeText_ecx = NULL;
 }
 
 void ChatFixer::Pause(void)
@@ -205,6 +204,7 @@ void ChatFixer::Pause(void)
         delete[] m_text;
         m_text = NULL;
     }
+    InsertAndColorizeText_ecx = NULL;
 }
 
 void ChatFixer::UnPause(void)
@@ -269,7 +269,7 @@ void __fastcall CBaseHudChatLine__InsertAndColorizeText(DWORD* ecx, void* edx, w
 
     m_text = CloneWString(buf);
 
-    // addon stopped? delete[] ecx[103]
+    // addon stopped? delete[] m_text
     InsertAndColorizeText_ecx = ecx;
 
     CBaseHudChat* pChat = dynamic_cast<CBaseHudChat*>(CBaseHudChat__GetParent(ecx));
