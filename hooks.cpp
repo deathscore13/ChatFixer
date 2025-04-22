@@ -1,47 +1,59 @@
-#include "hooks.h"
+﻿#include "hooks.h"
 
-CHook::CHook(DWORD func, void* address)
+CHook::CHook(void* func, void* addr)
 {
-	addr = address;
+    address = addr;
 
-	memcpy(jmp, "\xE9\x90\x90\x90\x90\xC3", __CHOOK_SIZE);
-
-	DWORD JMPSize = (func - (DWORD)addr - 5);
-	VirtualProtect(addr, __CHOOK_SIZE, PAGE_EXECUTE_READWRITE, &oldProtect);
-
-	memcpy(oldBytes, addr, __CHOOK_SIZE);
-	memcpy(&jmp[1], &JMPSize, 4);
-
-	VirtualProtect(addr, __CHOOK_SIZE, oldProtect, NULL);
+#ifdef _WIN64
+    memcpy(&jmp[2], &func, 8);
+#else
+    uintptr_t offset = reinterpret_cast<uintptr_t>(func) - (reinterpret_cast<uintptr_t>(addr) + 5);
+    memcpy(&jmp[1], &offset, 4);
+#endif
 }
 
 CHook::~CHook()
 {
-	if (hooked)
-		Unhook();
+    Unhook();
 }
 
-void CHook::Hook()
+bool CHook::Hook()
 {
-	VirtualProtect(addr, __CHOOK_SIZE, protect, NULL);
+    if (hooked)
+        return true;
+    
+    DWORD oldProtect;
+    if (!VirtualProtect(address, sizeof(jmp), PAGE_EXECUTE_READWRITE, &oldProtect))
+        return false;
 
-	memcpy(addr, jmp, __CHOOK_SIZE);
-	hooked = true;
+    memcpy(oldBytes, address, sizeof(jmp));
+    memcpy(address, jmp, sizeof(jmp));
+    hooked = true;
 
-	VirtualProtect(addr, __CHOOK_SIZE, oldProtect, NULL);
+    return true;
 }
 
-void CHook::Unhook()
+bool CHook::Unhook()
 {
-	VirtualProtect(addr, __CHOOK_SIZE, protect, NULL);
+    if (!hooked)
+        return true;
+    
+    DWORD oldProtect;
+    if (!VirtualProtect(address, sizeof(jmp), PAGE_EXECUTE_READWRITE, &oldProtect))
+        return false;
 
-	memcpy(addr, oldBytes, __CHOOK_SIZE);
-	hooked = false;
+    memcpy(address, oldBytes, sizeof(jmp));
+    hooked = false;
 
-	VirtualProtect(addr, __CHOOK_SIZE, oldProtect, NULL);
+    return true;
 }
 
 bool CHook::IsHooked()
 {
-	return hooked;
+    return hooked;
+}
+
+uintptr_t CHook::addr()
+{
+    return reinterpret_cast<uintptr_t>(address);
 }

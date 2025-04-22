@@ -1,29 +1,37 @@
-#ifndef __CHOOKS_H
+﻿#pragma once
 
 #include <Windows.h>
-
-#define __CHOOK_SIZE 6
 
 class CHook
 {
 private:
-	BYTE oldBytes[__CHOOK_SIZE] = { 0 };
-	BYTE jmp[__CHOOK_SIZE] = { 0 };
+#ifdef _WIN64
+    BYTE jmp[14] = {
+        0x48, 0xB8, // MOV RAX, [target]
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0xFF, 0xE0, // JMP RAX
+        0x90, 0x90  // NOP NOP
+    };
+#else
+    BYTE jmp[6] = {
+        0xE9,   // JMP [offset]
+        0x00, 0x00, 0x00, 0x00,
+        0xC3    // RET
+    };
+#endif
+    BYTE oldBytes[sizeof(jmp)] = {0};
 
-	DWORD oldProtect = NULL;
-	DWORD protect = PAGE_EXECUTE_READWRITE;
-
-	void* addr = NULL;
-	bool hooked = false;
+    void* address = nullptr;
+    bool hooked = false;
 
 public:
-	CHook(DWORD func, void* addr);
-	~CHook();
+    CHook(void* func, void* addr);
+    ~CHook();
 
-	void Hook();
-	void Unhook();
+    bool Hook();
+    bool Unhook();
 
-	bool IsHooked();
+    bool IsHooked();
+    uintptr_t addr();
 };
-
-#endif
